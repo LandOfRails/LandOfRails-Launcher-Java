@@ -1,4 +1,41 @@
-<?import javafx.scene.layout.GridPane?>
-<GridPane fx:controller="net.landofrails.Login"
-          xmlns:fx="http://javafx.com/fxml" alignment="center" hgap="10" vgap="10">
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<GridPane alignment="center" hgap="10" prefHeight="203.0" prefWidth="429.0" vgap="10"
+          xmlns="http://javafx.com/javafx/11.0.1" xmlns:fx="http://javafx.com/fxml/1"
+          fx:controller="net.landofrails.Login">
+    <padding>
+        <Insets bottom="10" left="25" right="25" top="25"/>
+    </padding>
+    <columnConstraints>
+        <ColumnConstraints/>
+    </columnConstraints>
+    <rowConstraints>
+        <RowConstraints/>
+        <RowConstraints/>
+        <RowConstraints/>
+        <RowConstraints/>
+        <RowConstraints/>
+        <RowConstraints/>
+    </rowConstraints>
+    <children>
+        <Label alignment="CENTER" contentDisplay="CENTER" prefHeight="26.0" prefWidth="273.0" text=" Minecraft Login"
+               textAlignment="CENTER">
+            <font>
+                <Font size="17.0"/>
+            </font>
+        </Label>
+        <TextField fx:id="email" promptText="E-Mail" GridPane.rowIndex="1"/>
+        <PasswordField fx:id="password" promptText="Password" GridPane.rowIndex="2"/>
+        <Button alignment="CENTER" contentDisplay="CENTER" mnemonicParsing="false" onAction="#handleLoginButton"
+                prefHeight="26.0" prefWidth="272.0" text="Login" textAlignment="CENTER" GridPane.rowIndex="4"/>
+        <CheckBox fx:id="remember" mnemonicParsing="false" text="Remember " GridPane.rowIndex="3"/>
+        <Label fx:id="inputwasincorrect" alignment="CENTER" contentDisplay="CENTER" prefHeight="18.0" prefWidth="272.0"
+               style="visibility: false;" text="Email or password was incorrect!" textAlignment="CENTER"
+               textFill="#b50000" GridPane.rowIndex="5"/>
+    </children>
+
 </GridPane>
