@@ -12,15 +12,13 @@ public class HashPin {
     private static final String HASHALGORITHM = "PBKDF2WithHmacSHA1";
     private static final int SALTSIZE = 16;
 
-    public static byte[] makeSaltyHashFromPin(final String pin) {
-        
+    public static byte[] generateSalt() {
         byte[] salt = new byte[SALTSIZE];
         new SecureRandom().nextBytes(salt);
-
-        return makeSaltyHashFromPinAndSalt(pin, salt);
+        return salt;
     }
 
-    public static byte[] makeSaltyHashFromPinAndSalt(final String pin, final byte[] salt) {
+    public static byte[] generateSaltyHashFromPinAndSalt(final String pin, final byte[] salt) {
 
         try {
 
@@ -42,12 +40,12 @@ public class HashPin {
         return null;
     }
 
-    public static String getSaltFromSaltyHash(final byte[] saltyHash) {
+    public static byte[] getSaltFromSaltyHash(final byte[] saltyHash) {
 
         byte[] salt = new byte[SALTSIZE];
         System.arraycopy(saltyHash, 0, salt, 0, SALTSIZE);
 
-        return new String(salt);
+        return salt;
     }
 
 }
