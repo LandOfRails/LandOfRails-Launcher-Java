@@ -7,6 +7,7 @@ import net.landofrails.logindata.hashing.HashPin;
 import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.util.Arrays;
 import java.util.Base64;
@@ -22,7 +23,7 @@ public class Storage {
 
     private static Storage instance = null;
 
-    private File loginFile = null;
+    private Path loginFilePath = null;
 
     private Storage() {
         String homePath = System.getProperty("user.home");
@@ -31,13 +32,13 @@ public class Storage {
             if (home.exists()) {
                 File launcherFolder = new File(home, LAUNCHERFOLDERNAME);
                 launcherFolder.mkdirs();
-                loginFile = new File(launcherFolder, LOGINFILENAME);
+                loginFilePath = new File(launcherFolder, LOGINFILENAME).toPath();
             }
         }
     }
 
-    private Storage(File loginFile) {
-        this.loginFile = loginFile;
+    private Storage(Path loginFilePath) {
+        this.loginFilePath = loginFilePath;
     }
 
     public static Storage getInstance() {
@@ -46,15 +47,17 @@ public class Storage {
         return instance;
     }
 
-    public static Storage getInstance(File loginFile) {
-        return new Storage(loginFile);
+    public static Storage getInstance(Path loginFilePath) {
+        return new Storage(loginFilePath);
     }
 
     public void storeLogin(String email, String password, Optional<String> optionalPin) {
         final String pin = optionalPin.orElse(DEFAULTPIN);
 
+        //
+        final byte[] salt = HashPin.generateSalt();
         // Hash pin
-        final byte[] hashedPin = HashPin.makeSaltyHashFromPin(pin);
+        final byte[] hashedPin = HashPin.generateSaltyHashFromPinAndSalt(pin, salt);
         // Encode pin
         final String baseHashedPin = Base64.getEncoder().withoutPadding().encodeToString(hashedPin);
 
@@ -65,14 +68,13 @@ public class Storage {
 
         // Store hashed pin
         try {
-            Files.deleteIfExists(loginFile.toPath());
-            loginFile.mkdirs();
-            if (loginFile.canWrite()) {
-                Files.write(loginFile.toPath(), baseHashedPin.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING);
+            loginFilePath.toFile().mkdirs();
+            if (loginFilePath.toFile().canWrite()) {
+                Files.write(loginFilePath, baseHashedPin.getBytes(StandardCharsets.UTF_8), StandardOpenOption.TRUNCATE_EXISTING);
                 String e = "\n" + encryptedEmail;
-                Files.write(loginFile.toPath(), e.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+                Files.write(loginFilePath, e.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
                 String p = "\n" + encryptedPassword;
-                Files.write(loginFile.toPath(), p.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
+                Files.write(loginFilePath, p.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND);
             } else {
                 throw new RuntimeException("Cant write");
             }
@@ -84,7 +86,7 @@ public class Storage {
     }
 
     public boolean hasLoginStored() {
-        return loginFile != null && loginFile.exists() && loginFile.length() > 0;
+        return loginFilePath != null && loginFilePath.toFile().exists() && loginFilePath.toFile().length() > 0;
     }
 
     public String[] getLogin(Optional<String> optionalPin) throws IllegalPinException {
@@ -94,13 +96,13 @@ public class Storage {
         // salt from stored hashed pin
         BufferedReader brTest = null;
         try {
-            brTest = new BufferedReader(new FileReader(loginFile));
+            brTest = new BufferedReader(new FileReader(loginFilePath.toFile()));
             final String storedEncodedSaltyHashedPin = brTest.readLine();
             final byte[] storedSaltyHashedPin = Base64.getDecoder().decode(storedEncodedSaltyHashedPin);
-            final String salt = HashPin.getSaltFromSaltyHash(storedSaltyHashedPin);
+            final byte[] salt = HashPin.getSaltFromSaltyHash(storedSaltyHashedPin);
 
             // hashed pin from plain pin
-            final byte[] saltyHashedPin = HashPin.makeSaltyHashFromPinAndSalt(pin, salt.getBytes(StandardCharsets.UTF_8));
+            final byte[] saltyHashedPin = HashPin.generateSaltyHashFromPinAndSalt(pin, salt);
 
             // check hashed pin with stored hashed pin
             if (Arrays.equals(saltyHashedPin, storedSaltyHashedPin)) {
@@ -135,10 +137,8 @@ public class Storage {
     }
 
     public void delete() throws IOException {
-
-        if (loginFile != null)
-            Files.deleteIfExists(loginFile.toPath());
-
+        if (loginFilePath != null)
+            Files.deleteIfExists(loginFilePath);
     }
 
 }
