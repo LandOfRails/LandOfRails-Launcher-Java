@@ -26,11 +26,11 @@ public class App extends Application {
         this.stage = primaryStage;
         stage.setOnCloseRequest((eventus) -> {
             Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
-            alert.setTitle("");
-            alert.setHeaderText("Bist du dir sicher?");
-            ButtonType buttonTypeOne = new ButtonType("Ja");
+            alert.setTitle("Login");
+            alert.setHeaderText("Are you sure?");
+            ButtonType buttonTypeOne = new ButtonType("Yes");
             alert.initModality(Modality.NONE);
-            ButtonType buttonTypeCancel = new ButtonType("Nein", ButtonBar.ButtonData.CANCEL_CLOSE);
+            ButtonType buttonTypeCancel = new ButtonType("No", ButtonBar.ButtonData.CANCEL_CLOSE);
             alert.getButtonTypes().setAll(buttonTypeOne, buttonTypeCancel);
             if (alert.showAndWait().get().getButtonData().equals(ButtonBar.ButtonData.CANCEL_CLOSE)) {
                 eventus.consume();
